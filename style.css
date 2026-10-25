@@ -152,6 +152,124 @@ body {
   opacity: 0.75;
 }
 
+.upgrade.spell {
+  background: rgba(255, 122, 217, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 122, 217, 0.28);
+}
+
+.wheel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 4, 16, 0.72);
+}
+
+.wheel-overlay[hidden] {
+  display: none;
+}
+
+.wheel-box {
+  text-align: center;
+}
+
+.wheel-title {
+  margin-bottom: 0.8rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.wheel-stage {
+  position: relative;
+  width: min(340px, 80vw);
+  height: min(340px, 80vw);
+  margin: 0 auto;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 28px solid #ffd24a;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+}
+
+.wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 8px rgba(255, 210, 74, 0.28),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.wheel-slice-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46%;
+  transform-origin: left center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.wheel-result {
+  margin-top: 1rem;
+  min-height: 2.4em;
+  font-weight: 700;
+}
+
+.game-btn.disco-btn {
+  animation: disco-bg 0.45s linear infinite;
+}
+
+body.baguette .coin {
+  filter: sepia(0.8) hue-rotate(25deg);
+}
+
+.game-btn.mustache::after {
+  content: "〜〜";
+  position: absolute;
+  left: 50%;
+  bottom: 0.15rem;
+  transform: translateX(-50%);
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+.game-btn.duck {
+  background: linear-gradient(180deg, #ffe36a, #f0a202);
+  color: #4a2a00;
+}
+
+.game-btn.mime {
+  opacity: 0.28;
+}
+
+.game-btn.op-aura {
+  box-shadow: 0 0 40px #fff, 0 0 80px #ffd24a;
+}
+
+@keyframes disco-bg {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
 .score {
   margin-top: 0.2rem;
   font-size: 1.6rem;
@@ -203,6 +321,7 @@ body {
 }
 
 .game-btn {
+  position: relative;
   min-width: 180px;
   padding: 1.1rem 1.8rem;
   border: 0;
@@ -344,6 +463,10 @@ body {
   animation: none;
 }
 
+.trail.yogurt {
+  background: radial-gradient(circle, rgba(255, 170, 210, 0.9), rgba(255, 90, 160, 0.2) 55%, transparent 70%);
+}
+
 .trail {
   position: absolute;
   width: 16px;
@@ -411,5 +534,168 @@ body {
   to {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.2);
+  }
+}
+
+.spell-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.spell-actor {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  font-size: 4rem;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.35));
+}
+
+.spell-actor.giant {
+  font-size: 8rem;
+}
+
+.game-btn.bitten {
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 78% 58%, 70% 78%, 58% 62%, 0 70%);
+}
+
+.button-chunk {
+  position: absolute;
+  width: 58px;
+  height: 36px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ff7ad9, #7c5cff);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.spoon-wrap {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 7.5rem;
+  line-height: 1;
+  animation: spoon-scoop 1.8s ease-in-out forwards;
+}
+
+@keyframes spoon-scoop {
+  0% {
+    transform: translate(-40vw, -20vh) rotate(-25deg);
+  }
+  35% {
+    transform: translate(-6vw, 4vh) rotate(-8deg);
+  }
+  55% {
+    transform: translate(2vw, 8vh) rotate(12deg);
+  }
+  100% {
+    transform: translate(70vw, -30vh) rotate(28deg);
+  }
+}
+
+@keyframes fly-in-left {
+  from {
+    transform: translate(-50vw, -50%) scale(0.4) rotate(-20deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes slam-down {
+  0% {
+    transform: translate(-50%, -80vh) rotate(-10deg);
+  }
+  70% {
+    transform: translate(-50%, -40%) rotate(8deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+@keyframes laser-beam {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  30% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+.laser {
+  position: absolute;
+  height: 14px;
+  background: linear-gradient(90deg, #ff4d4d, #fff);
+  border-radius: 8px;
+  transform-origin: left center;
+  box-shadow: 0 0 18px #ff4d4d;
+  animation: laser-beam 0.9s ease-out forwards;
+}
+
+@keyframes rain-down {
+  from {
+    transform: translateY(-40vh) rotate(var(--rot));
+    opacity: 1;
+  }
+  to {
+    transform: translateY(70vh) rotate(calc(var(--rot) + 40deg));
+    opacity: 0.2;
+  }
+}
+
+@keyframes puff {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -80%) scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes waddle {
+  0% {
+    transform: translate(-40vw, -50%);
+  }
+  100% {
+    transform: translate(60vw, -50%);
+  }
+}
+
+@keyframes sock-slap {
+  0% {
+    transform: translate(-50%, -120%) rotate(-40deg);
+  }
+  40% {
+    transform: translate(-50%, -50%) rotate(15deg);
+  }
+  100% {
+    transform: translate(40vw, 40vh) rotate(80deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cosmic-boom {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(8);
+    opacity: 0;
   }
 }

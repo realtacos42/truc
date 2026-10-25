@@ -16,6 +16,10 @@ const shop = document.getElementById("shop");
 const shopList = document.getElementById("shopList");
 const playerStats = document.getElementById("playerStats");
 const maxHpEl = document.getElementById("maxHp");
+const wheelOverlay = document.getElementById("wheelOverlay");
+const wheel = document.getElementById("wheel");
+const wheelResult = document.getElementById("wheelResult");
+const spellStage = document.getElementById("spellStage");
 
 const stats = {
   damage: 10,
@@ -83,6 +87,65 @@ const upgrades = [
   },
 ];
 
+const SPELL_COST = 25;
+const SPELL_COLORS = ["#7c5cff", "#ff7ad9", "#39d98a", "#ffd24a", "#ff6b6b", "#5cc8ff", "#ff9f43", "#c084fc"];
+
+const spells = [
+  { id: "fromage", name: "Fromage lunaire", text: "Les pièces sentent le camembert spatial.", apply: () => { buffs.cheese = true; } },
+  { id: "moustache", name: "Moustache du destin", text: "Le bouton se prend pour un magician.", apply: () => { buffs.mustache = true; stats.damage += 2; button.classList.add("mustache"); } },
+  { id: "canard", name: "Malédiction canard", text: "COIN COIN. C’est tout le sort.", apply: () => { buffs.duck = true; button.classList.add("duck"); } },
+  { id: "disco", name: "Boule disco interdite", text: "Le bouton fait la java. 4 secondes, pas plus.", apply: () => {
+      button.classList.add("disco-btn");
+      window.setTimeout(() => button.classList.remove("disco-btn"), 4000);
+    } },
+  { id: "baguette", name: "Gravité baguette", text: "Tout tombe, comme après un repas.", apply: () => { document.body.classList.add("baguette"); stats.magnet = Math.max(400, stats.magnet - 200); } },
+  { id: "mime", name: "Mime invisible", text: "Le bouton existe… à peine.", apply: () => { button.classList.add("mime"); } },
+  { id: "yaourt", name: "Ficelle de yaourt", text: "Traînée rose, dignité nulle.", apply: () => { buffs.yogurt = true; } },
+  { id: "honk", name: "Honk de l’oie fiscale", text: "L’oie te reverse 7 G puis s’en va.", apply: () => { gold += 7; } },
+  { id: "chaussette", name: "Chaussette mouillée", text: "Tu perds 5 G. C’était prévisible.", apply: () => { gold = Math.max(0, gold - 5); } },
+  { id: "couscous", name: "Couscous de soin", text: "Le bouton se ressert une assiette. Full PV.", apply: () => { if (!dead) hp = MAX_HP; } },
+  { id: "nounours", name: "Laser de nounours", text: "Un ours en peluche tire un laser. -30 PV.", apply: () => { if (!dead) hp = Math.max(0, hp - 30); } },
+  { id: "banane", name: "Peau de banane", text: "Le prochain clic glisse à côté.", apply: () => { buffs.missNext = true; } },
+  { id: "pinata", name: "Piñata émotionnelle", text: "+6 pièces à la prochaine explosion.", apply: () => { stats.coins += 6; } },
+  { id: "escargot", name: "Escargot express", text: "Les pièces méditent avant de revenir.", apply: () => { stats.magnet += 900; } },
+  { id: "toux", name: "Toux critique", text: "Un coup bonus. Atchoum.", apply: () => { stats.hits += 1; } },
+  { id: "politesse", name: "S’il-te-plaît mortel", text: "Le bouton dit merci et se soigne de 15.", apply: () => { if (!dead) hp = Math.min(MAX_HP, hp + 15); } },
+  { id: "pet", name: "Pet du chaos", text: "Dégâts +1. L’odeur est permanente.", apply: () => { stats.damage += 1; } },
+  { id: "yaourt2", name: "Cuillère qui juge", text: "La cuillère te donne 3 dégâts par déception.", apply: () => { stats.damage += 3; } },
+  { id: "trombone", name: "Trombone spirituel", text: "Ça attache tes coups ensemble : +1 coup.", apply: () => { stats.hits += 1; } },
+  { id: "gaufre", name: "Gaufre temporelle", text: "Les pièces reviennent plus vite, sirop compris.", apply: () => { stats.magnet = Math.max(350, stats.magnet - 600); } },
+  {
+    id: "op",
+    name: "SUPER MEGA GIGA ANNIHILATION™",
+    text: "0,1% : le bouton est juridiquement supprimé. +777 G, stats absurdes.",
+    op: true,
+    apply: () => {
+      gold += 777;
+      stats.damage += 50;
+      stats.hits += 5;
+      stats.coins += 20;
+      stats.luck += 12;
+      stats.magnet = 200;
+      button.classList.add("op-aura");
+      if (!dead) {
+        hp = 0;
+      }
+    },
+  },
+];
+
+const normalSpells = spells.filter((spell) => !spell.op);
+const opSpell = spells.find((spell) => spell.op);
+
+const buffs = {
+  cheese: false,
+  duck: false,
+  mustache: false,
+  yogurt: false,
+  missNext: false,
+};
+
+let spinning = false;
 let hp = MAX_HP;
 let gold = 0;
 let dead = false;
@@ -174,6 +237,20 @@ function renderShop() {
     row.addEventListener("click", () => buyUpgrade(item));
     shopList.appendChild(row);
   }
+
+  const spellRow = document.createElement("button");
+  spellRow.type = "button";
+  spellRow.className = "upgrade spell";
+  spellRow.disabled = spinning || gold < SPELL_COST;
+  spellRow.innerHTML = `
+    <span class="upgrade-top">
+      <span>Sort</span>
+      <span class="upgrade-cost">${SPELL_COST} G</span>
+    </span>
+    <span class="upgrade-desc">Lance la roue. Un sort super mega giga OP est caché à 0,1%.</span>
+  `;
+  spellRow.addEventListener("click", buySpellSpin);
+  shopList.appendChild(spellRow);
 }
 
 function buyUpgrade(item) {
@@ -190,6 +267,229 @@ function buyUpgrade(item) {
   renderShop();
 }
 
+function shuffle(list) {
+  const copy = [...list];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function pickWinner(shown) {
+  if (Math.random() < 0.001) {
+    return opSpell;
+  }
+  return shown[Math.floor(Math.random() * shown.length)];
+}
+
+function buildWheel(slices) {
+  const n = slices.length;
+  const stops = slices
+    .map((slice, index) => {
+      const color = slice.op ? "#fff3a8" : SPELL_COLORS[index % SPELL_COLORS.length];
+      return `${color} ${(index / n) * 360}deg ${((index + 1) / n) * 360}deg`;
+    })
+    .join(", ");
+  wheel.style.background = `conic-gradient(${stops})`;
+  wheel.innerHTML = "";
+  slices.forEach((slice, index) => {
+    const label = document.createElement("span");
+    label.className = "wheel-slice-label";
+    label.textContent = slice.op ? "OP???" : slice.name;
+    const angle = (index + 0.5) * (360 / n);
+    label.style.transform = `rotate(${angle}deg) translate(18px, -0.5em)`;
+    wheel.appendChild(label);
+  });
+}
+
+function playWheelSound() {
+  for (let i = 0; i < 10; i += 1) {
+    playTone({
+      type: "square",
+      freq: 280 + i * 40,
+      endFreq: 320 + i * 50,
+      duration: 0.08,
+      volume: 0.03,
+      delay: i * 0.18,
+    });
+  }
+}
+
+function buySpellSpin() {
+  if (spinning || gold < SPELL_COST) {
+    return;
+  }
+  gold -= SPELL_COST;
+  spinning = true;
+  render();
+  renderShop();
+  shop.setAttribute("hidden", "");
+  shopBtn.classList.remove("open");
+
+  const shown = shuffle(normalSpells).slice(0, 8);
+  const winner = pickWinner(shown);
+  const slices = winner.op ? [...shown.slice(0, 7), winner] : shown;
+  const index = slices.findIndex((slice) => slice.id === winner.id);
+  buildWheel(slices);
+  wheel.style.transition = "none";
+  wheel.style.transform = "rotate(0deg)";
+  wheelResult.textContent = "La roue hésite, c’est jamais bon signe.";
+  wheelOverlay.removeAttribute("hidden");
+  playWheelSound();
+
+  const sliceAngle = 360 / slices.length;
+  const target = 360 * 6 + (360 - (index * sliceAngle + sliceAngle / 2));
+  requestAnimationFrame(() => {
+    wheel.style.transition = "transform 3.6s cubic-bezier(0.12, 0.75, 0.08, 1)";
+    wheel.style.transform = `rotate(${target}deg)`;
+  });
+
+  window.setTimeout(() => {
+    wheelOverlay.setAttribute("hidden", "");
+    playSpellVisual(winner.id);
+    winner.apply();
+    spinning = false;
+    hintEl.textContent = winner.op
+      ? "IMPOSSIBLE. Le sort super mega giga OP est tombé."
+      : `Sort : ${winner.name}`;
+    if (!dead && hp <= 0) {
+      killButton();
+    }
+    render();
+    renderShop();
+  }, 3700);
+}
+
+function buttonPoint() {
+  const rect = button.getBoundingClientRect();
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
+}
+
+function spawnActor(text, className, x, y, duration) {
+  const el = document.createElement("div");
+  el.className = `spell-actor ${className}`;
+  el.textContent = text;
+  el.style.setProperty("--x", `${x}px`);
+  el.style.setProperty("--y", `${y}px`);
+  spellStage.appendChild(el);
+  window.setTimeout(() => el.remove(), duration);
+  return el;
+}
+
+function playSpellVisual(id) {
+  const { x, y } = buttonPoint();
+  const visuals = {
+    fromage: () => {
+      spawnActor("🧀", "giant", x, y - 40, 1400).style.animation = "slam-down 0.8s ease-out";
+    },
+    moustache: () => {
+      spawnActor("〰️", "", x, y + 18, 1400).style.animation = "slam-down 0.55s ease-out";
+    },
+    canard: () => {
+      const duck = spawnActor("🦆", "giant", x, y, 1600);
+      duck.style.animation = "waddle 1.5s linear";
+    },
+    disco: () => {
+      spawnActor("🪩", "giant", x, y - 90, 4000).style.animation = "slam-down 0.6s ease-out";
+    },
+    baguette: () => {
+      for (let i = 0; i < 7; i += 1) {
+        const loaf = spawnActor("🥖", "", 80 + Math.random() * (window.innerWidth - 160), -20, 1400);
+        loaf.style.setProperty("--rot", `${Math.random() * 80 - 40}deg`);
+        loaf.style.animation = `rain-down ${0.9 + Math.random() * 0.5}s linear`;
+      }
+    },
+    mime: () => {
+      spawnActor("🧤", "", x - 70, y, 1400).style.animation = "fly-in-left 0.5s ease-out";
+      spawnActor("...", "", x, y - 50, 1400);
+    },
+    yaourt: () => {
+      spawnActor("🥛", "giant", x, y, 1200).style.animation = "puff 0.9s ease-out forwards";
+    },
+    honk: () => {
+      const goose = spawnActor("🪿", "giant", x, y, 1600);
+      goose.style.animation = "waddle 1.4s linear";
+    },
+    chaussette: () => {
+      spawnActor("🧦", "giant", x, 80, 1300).style.animation = "sock-slap 1.2s ease-in forwards";
+    },
+    couscous: () => {
+      spawnActor("🍲", "giant", x, y - 30, 1400).style.animation = "slam-down 0.7s ease-out";
+    },
+    nounours: () => {
+      spawnActor("🧸", "giant", 90, y, 1400);
+      const beam = document.createElement("div");
+      beam.className = "laser";
+      beam.style.left = "140px";
+      beam.style.top = `${y}px`;
+      beam.style.width = `${Math.max(40, x - 140)}px`;
+      spellStage.appendChild(beam);
+      window.setTimeout(() => beam.remove(), 900);
+    },
+    banane: () => {
+      spawnActor("🍌", "", x, y + 50, 1800).style.animation = "slam-down 0.5s ease-out";
+    },
+    pinata: () => {
+      spawnActor("🪅", "giant", x, y - 40, 1400).style.animation = "slam-down 0.5s ease-out";
+      ["🍬", "🍭", "✨"].forEach((candy, i) => {
+        const bit = spawnActor(candy, "", x, y, 1000);
+        bit.style.animation = `puff ${0.7 + i * 0.1}s ease-out forwards`;
+      });
+    },
+    escargot: () => {
+      const snail = spawnActor("🐌", "", x - 80, y + 40, 2000);
+      snail.style.animation = "waddle 2s linear";
+    },
+    toux: () => {
+      spawnActor("💨", "giant", x + 40, y - 20, 1100).style.animation = "puff 0.9s ease-out forwards";
+    },
+    politesse: () => {
+      spawnActor("🙏", "", x, y - 70, 1400).style.animation = "slam-down 0.5s ease-out";
+    },
+    pet: () => {
+      spawnActor("☁️", "giant", x, y + 10, 1200).style.animation = "puff 1s ease-out forwards";
+    },
+    yaourt2: () => playSpoonFx(x, y),
+    trombone: () => {
+      spawnActor("📎", "giant", x, y, 1400).style.animation = "slam-down 0.55s ease-out";
+    },
+    gaufre: () => {
+      spawnActor("🧇", "giant", x, y - 20, 1400).style.animation = "slam-down 0.6s ease-out";
+    },
+    op: () => {
+      const boom = document.createElement("div");
+      boom.className = "spell-actor";
+      boom.textContent = "💥";
+      boom.style.setProperty("--x", `${x}px`);
+      boom.style.setProperty("--y", `${y}px`);
+      boom.style.fontSize = "6rem";
+      boom.style.animation = "cosmic-boom 1s ease-out forwards";
+      spellStage.appendChild(boom);
+      window.setTimeout(() => boom.remove(), 1000);
+    },
+  };
+  (visuals[id] || (() => {}))();
+}
+
+function playSpoonFx(x, y) {
+  const wrap = document.createElement("div");
+  wrap.className = "spoon-wrap";
+  wrap.style.left = `${x}px`;
+  wrap.style.top = `${y}px`;
+  wrap.textContent = "🥄";
+  const chunk = document.createElement("div");
+  chunk.className = "button-chunk";
+  wrap.appendChild(chunk);
+  spellStage.appendChild(wrap);
+  button.classList.add("bitten");
+  window.setTimeout(() => button.classList.remove("bitten"), 1800);
+  window.setTimeout(() => wrap.remove(), 1800);
+}
+
 function render() {
   const ratio = Math.max(0, hp) / MAX_HP;
   hpEl.textContent = String(Math.max(0, hp));
@@ -204,7 +504,7 @@ function render() {
         ? "linear-gradient(90deg, #ffb020, #ffd36a)"
         : "linear-gradient(90deg, #ff4d4d, #ff8a8a)";
   if (!dead) {
-    button.textContent = `${hp} PV`;
+    button.textContent = buffs.duck ? `COIN ${hp}` : `${hp} PV`;
   }
 }
 
@@ -232,7 +532,7 @@ function shardShape() {
 
 function spawnTrail(x, y) {
   const trail = document.createElement("div");
-  trail.className = "trail";
+    trail.className = buffs.yogurt ? "trail yogurt" : "trail";
   trail.style.left = `${x}px`;
   trail.style.top = `${y}px`;
   fx.appendChild(trail);
@@ -349,7 +649,7 @@ function explode(origin) {
     el.type = "button";
     el.className = "coin";
     face.className = "coin-face";
-    face.textContent = `${value}G`;
+    face.textContent = buffs.cheese ? `${value}🧀` : `${value}G`;
     el.appendChild(face);
     const coin = {
       el,
@@ -422,6 +722,12 @@ function respawn() {
 button.addEventListener("click", () => {
   ensureAudio();
   if (dead) {
+    return;
+  }
+
+  if (buffs.missNext) {
+    buffs.missNext = false;
+    hintEl.textContent = "Glissade de banane ! Le clic rate.";
     return;
   }
 
