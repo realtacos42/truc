@@ -7,19 +7,41 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <button type="button" class="shop-toggle" id="shopBtn" aria-label="Ouvrir la boutique">
+      <span class="shop-arrow" aria-hidden="true">➜</span>
+      <span class="shop-lock" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <path
+            fill="currentColor"
+            d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-7-2a2 2 0 1 1 4 0v2h-4V6zm3 10.2a1.5 1.5 0 1 1-1-2.7 1.5 1.5 0 0 1 1 2.7z"
+          />
+        </svg>
+      </span>
+    </button>
+    <aside class="shop" id="shop" hidden>
+      <div class="shop-head">
+        <h2>Boutique</h2>
+        <p>Dépense tes G pour t’améliorer</p>
+      </div>
+      <div class="shop-list" id="shopList"></div>
+    </aside>
     <div class="hud">
-      <p class="score">PV : <span id="hp">100</span> / 100</p>
+      <p class="gold">G : <span id="gold">0</span></p>
+      <p class="stats" id="playerStats">Dégâts 10 · Coups 1</p>
+      <p class="score">PV : <span id="hp">100</span> / <span id="maxHp">100</span></p>
       <p class="hint" id="hint">Clique le bouton pour lui faire des dégâts</p>
     </div>
-    <div class="arena">
-      <div class="fighter">
+    <div class="arena" id="arena">
+      <div class="fighter" id="fighter">
         <div class="hp-bar" aria-hidden="true">
           <div class="hp-fill" id="hpFill"></div>
         </div>
         <button type="button" class="game-btn" id="gameBtn">100 PV</button>
         <p class="hit-label" id="hitLabel" aria-hidden="true"></p>
       </div>
+      <button type="button" class="replay-btn hidden" id="replayBtn">Rejouer</button>
     </div>
+    <div class="fx" id="fx" aria-hidden="true"></div>
     <script src="game.js"></script>
   </body>
 </html>

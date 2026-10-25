@@ -22,11 +22,138 @@ body {
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  z-index: 2;
+  z-index: 4;
   pointer-events: none;
 }
 
+.gold {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffd24a;
+  text-shadow: 0 0 16px rgba(255, 210, 74, 0.45);
+}
+
+.gold.pop span {
+  display: inline-block;
+  animation: gold-pop 0.28s ease;
+}
+
+.stats {
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.shop-toggle {
+  position: fixed;
+  top: 1.1rem;
+  left: 1.1rem;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(18, 12, 40, 0.82);
+  color: #ffd24a;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 210, 74, 0.25);
+}
+
+.shop-toggle:hover {
+  filter: brightness(1.12);
+}
+
+.shop-arrow {
+  color: #f4f1ff;
+  font-size: 1.15rem;
+  transition: transform 0.2s ease;
+}
+
+.shop-toggle.open .shop-arrow {
+  transform: rotate(180deg);
+}
+
+.shop-lock {
+  display: grid;
+  place-items: center;
+  color: #ffd24a;
+}
+
+.shop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 11;
+  width: min(320px, 88vw);
+  height: 100vh;
+  padding: 4.6rem 1rem 1.2rem;
+  background: linear-gradient(180deg, rgba(28, 16, 58, 0.96), rgba(10, 10, 24, 0.96));
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.35);
+  overflow: auto;
+}
+
+.shop[hidden] {
+  display: none;
+}
+
+.shop-head h2 {
+  font-size: 1.25rem;
+}
+
+.shop-head p {
+  margin: 0.25rem 0 1rem;
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.upgrade {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.8rem;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.upgrade:hover:not(:disabled) {
+  background: rgba(255, 210, 74, 0.14);
+}
+
+.upgrade:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.upgrade-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.upgrade-cost {
+  color: #ffd24a;
+  white-space: nowrap;
+}
+
+.upgrade-desc {
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
 .score {
+  margin-top: 0.2rem;
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -51,6 +178,11 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 0.85rem;
+}
+
+.fighter.hidden {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .hp-bar {
@@ -97,13 +229,6 @@ body {
   box-shadow: 0 0 28px rgba(255, 80, 80, 0.55);
 }
 
-.game-btn:disabled {
-  cursor: default;
-  background: linear-gradient(180deg, #6b6280, #3a3348);
-  box-shadow: none;
-  filter: grayscale(0.35);
-}
-
 .hit-label {
   position: absolute;
   top: -0.4rem;
@@ -118,6 +243,119 @@ body {
   animation: float-hit 0.45s ease-out;
 }
 
+.replay-btn {
+  position: absolute;
+  min-width: 160px;
+  padding: 0.9rem 1.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #7cffb2, #39d98a);
+  color: #062017;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(57, 217, 138, 0.35);
+  z-index: 3;
+}
+
+.replay-btn.hidden {
+  display: none;
+}
+
+.fx {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.flash {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(180, 220, 255, 0.15) 55%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0.2);
+  animation: flash-burst 0.45s ease-out forwards;
+}
+
+.shard {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, 0.95) 0%, rgba(210, 230, 255, 0.45) 38%, rgba(255, 122, 217, 0.28) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.45),
+    inset 0 0 10px rgba(255, 255, 255, 0.4);
+  animation: shard-fly 1.15s cubic-bezier(0.12, 0.7, 0.28, 1) forwards;
+}
+
+.coin {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  perspective: 90px;
+  z-index: 6;
+}
+
+.coin-face {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #fff3a8;
+  background: radial-gradient(circle at 30% 28%, #fff6b5, #ffd24a 42%, #c98900);
+  color: #7a4a00;
+  font-size: 0.72rem;
+  font-weight: 800;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.35),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.18),
+    0 0 12px rgba(255, 210, 74, 0.35);
+  animation: coin-spin 0.7s linear infinite;
+  transform-style: preserve-3d;
+}
+
+.coin.magnet .coin-face {
+  box-shadow:
+    0 0 16px rgba(255, 210, 74, 0.85),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.18);
+}
+
+.coin:hover .coin-face {
+  filter: brightness(1.12);
+}
+
+.coin.collecting {
+  pointer-events: none;
+  animation: coin-collect 0.45s ease-in forwards;
+}
+
+.coin.collecting .coin-face {
+  animation: none;
+}
+
+.trail {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 230, 140, 0.85), rgba(255, 180, 40, 0.15) 55%, transparent 70%);
+  animation: trail-fade 0.32s ease-out forwards;
+  z-index: 5;
+}
+
 @keyframes float-hit {
   from {
     opacity: 1;
@@ -126,5 +364,52 @@ body {
   to {
     opacity: 0;
     transform: translateY(-18px);
+  }
+}
+
+@keyframes gold-pop {
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+@keyframes flash-burst {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.4);
+  }
+}
+
+@keyframes shard-fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot));
+  }
+}
+
+@keyframes coin-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+@keyframes coin-collect {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -120px) scale(0.4);
+  }
+}
+
+@keyframes trail-fade {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
   }
 }
