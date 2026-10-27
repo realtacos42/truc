@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Le bouton</title>
+    <title>Victime</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -25,33 +25,102 @@
       </div>
       <div class="shop-list" id="shopList"></div>
     </aside>
+    <button type="button" class="grimoire-toggle" id="grimoireBtn" aria-label="Ouvrir le centre des impôts">
+      <span class="grimoire-icon" aria-hidden="true">📋</span>
+    </button>
+    <aside class="grimoire" id="grimoire">
+      <div class="shop-head">
+        <div class="shop-head-row">
+          <h2>Impôts</h2>
+          <button type="button" class="panel-close" id="grimoireClose" aria-label="Fermer les impôts">✕</button>
+        </div>
+        <p>Tes impôts et les pouvoirs volés. Équipe un impôt, paie, et ça frappe l’ennemi.</p>
+      </div>
+      <div class="shop-list" id="grimoireList"></div>
+    </aside>
     <div class="hud">
       <p class="gold">G : <span id="gold">0</span></p>
       <p class="stats" id="playerStats">Dégâts 10 · Coups 1</p>
-      <p class="score">PV : <span id="hp">100</span> / <span id="maxHp">100</span></p>
-      <p class="hint" id="hint">Clique le bouton pour lui faire des dégâts</p>
+      <p class="equipped" id="equippedLabel">Impôt : aucun</p>
+      <p class="round-line" id="roundLine">Zone 1 · Round 1 · Victime</p>
+      <p class="you">Toi : <span id="playerHp">100</span></p>
+      <p class="score"><span id="foeLabel">Victime</span> : <span id="hp">100</span> / <span id="maxHp">100</span></p>
+      <p class="hint" id="hint">Flèches pour bouger. Clique la victime pour lui faire des dégâts.</p>
     </div>
     <div class="arena" id="arena">
-      <div class="fighter" id="fighter">
-        <div class="hp-bar" aria-hidden="true">
-          <div class="hp-fill" id="hpFill"></div>
-        </div>
-        <button type="button" class="game-btn" id="gameBtn">100 PV</button>
-        <p class="hit-label" id="hitLabel" aria-hidden="true"></p>
-      </div>
+      <div class="foe-row" id="foeRow"></div>
       <button type="button" class="replay-btn hidden" id="replayBtn">Rejouer</button>
+    </div>
+    <button type="button" class="investor hidden" id="investorBtn" aria-label="Ouvrir l’investisseur Monopoli">
+      <span class="investor-hat" aria-hidden="true">🎩</span>
+      <span class="investor-face" aria-hidden="true">🤑</span>
+      <span class="investor-name">Investisseur Monopoli</span>
+    </button>
+    <aside class="rebirth" id="rebirth" hidden>
+      <div class="shop-head">
+        <div class="shop-head-row">
+          <h2>Contrat de rebirth</h2>
+          <button type="button" class="panel-close" id="rebirthClose" aria-label="Fermer le contrat">✕</button>
+        </div>
+        <p>Oncle Monopoli te téléporte… pour 100 000 G.</p>
+      </div>
+      <p class="rebirth-copy" id="rebirthCopy">
+        Boardwalk : 2 boutons, or ×2, carte Chance, et tu es rempli de DÉTERMINATION.
+      </p>
+      <p class="rebirth-speech" id="rebirthSpeech">« Les affaires, c’est la guerre. Signe ici. »</p>
+      <button type="button" class="rebirth-go" id="rebirthGo">Signer (100 000 G)</button>
+    </aside>
+    <div class="tp-flash" id="tpFlash" hidden>TU ES REMPLI DE DÉTERMINATION</div>
+    <div class="ut-battle hidden" id="utBattle">
+      <p class="ut-flavor" id="utFlavor">* un boss bloque le chemin.</p>
+      <div class="ut-box" id="utBox">
+        <div class="ut-soul" id="utSoul">
+          <span class="hero-head">😎</span>
+        </div>
+      </div>
+      <div class="ut-menu">
+        <button type="button" class="ut-btn" id="utFight">FIGHT</button>
+        <button type="button" class="ut-btn" id="utAct">ACT</button>
+        <button type="button" class="ut-btn" id="utItem">ITEM</button>
+        <button type="button" class="ut-btn" id="utMercy">MERCY</button>
+      </div>
+    </div>
+    <div class="hero" id="hero" aria-hidden="true">
+      <span class="hero-cape"></span>
+      <span class="hero-head">😎</span>
+      <span class="hero-torso"></span>
+      <span class="hero-boot left"></span>
+      <span class="hero-boot right"></span>
     </div>
     <div class="fx" id="fx" aria-hidden="true"></div>
     <div class="spell-stage" id="spellStage" aria-hidden="true"></div>
     <div class="wheel-overlay" id="wheelOverlay" hidden>
       <div class="wheel-box">
-        <p class="wheel-title">Roue des sorts bizarres</p>
+        <p class="wheel-title">Roue des impôts bizarres</p>
         <div class="wheel-stage">
           <div class="wheel-pointer" aria-hidden="true"></div>
           <div class="wheel" id="wheel"></div>
         </div>
         <p class="wheel-result" id="wheelResult">Ça tourne…</p>
       </div>
+    </div>
+    <div class="ending hidden" id="ending" aria-hidden="true">
+      <div class="nuke-flash"></div>
+      <div class="nuke-stem"></div>
+      <div class="nuke-cap"></div>
+      <div class="farm-scene">
+        <div class="farm-sky"></div>
+        <div class="farm-sun">☀️</div>
+        <div class="farm-field">🌾🌾🌾🌾🌾</div>
+        <div class="farm-house">🏠</div>
+        <div class="farm-cow">🐄</div>
+        <div class="farm-hero">
+          <span class="hero-cape"></span>
+          <span class="hero-head">😎</span>
+          <span class="hero-torso"></span>
+        </div>
+      </div>
+      <p class="ending-text">pense à désinstaller minecraft</p>
     </div>
     <script src="game.js"></script>
   </body>
